@@ -37,7 +37,7 @@ class TopicController extends Controller
         $data = $req->all();
         $this->topic->createTopic($data);
 
-        return Qs::jsonStoreOk();
+        return redirect()->route('topics.index')->with('flash_success', __('msg.store_ok'));
     }
 
     public function edit($id)
@@ -54,13 +54,13 @@ class TopicController extends Controller
         $data = $req->all();
         $this->topic->updateTopic($id, $data);
 
-        return Qs::jsonUpdateOk();
+        return redirect()->route('topics.index')->with('flash_success', __('msg.update_ok'));
     }
 
     public function destroy($id)
     {
         $this->topic->deleteTopic($id);
-        return back()->with('flash_success', __('msg.delete_ok'));
+        return redirect()->route('topics.index')->with('flash_success', __('msg.delete_ok'));
     }
 
     public function getSubjectsByClass($class_id)
