@@ -27,6 +27,21 @@ Route::group(['middleware' => 'auth'], function () {
 
     /*************** Support Team *****************/
     Route::group(['namespace' => 'SupportTeam',], function(){
+        
+        /*************** Topics *****************/
+        Route::group(['prefix' => 'topics'], function(){
+            Route::get('/', 'TopicController@index')->name('topics.index');
+            Route::post('/', 'TopicController@store')->name('topics.store');
+            Route::get('/{id}/edit', 'TopicController@edit')->name('topics.edit');
+            Route::put('/{id}', 'TopicController@update')->name('topics.update');
+            Route::delete('/{id}', 'TopicController@destroy')->name('topics.destroy');
+            
+            // AJAX routes
+            Route::get('/subjects/by-class/{class_id}', 'TopicController@getSubjectsByClass')
+                ->name('topics.subjects.by.class');
+        });
+        
+        /*************** Students *****************/
 
         /*************** Students *****************/
         Route::group(['prefix' => 'students'], function(){
