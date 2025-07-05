@@ -36,6 +36,7 @@ class MarkController extends Controller
         $d['my_classes'] = $this->my_class->all();
         $d['sections'] = $this->my_class->getAllSections();
         $d['subjects'] = $this->my_class->getAllSubjects();
+        $d['topics'] = collect(); // Initialize empty collection for topics
         $d['selected'] = false;
 
         return view('pages.support_team.marks.index', $d);

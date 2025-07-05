@@ -55,4 +55,26 @@ class AjaxController extends Controller
         return $d;
     }
 
+    public function get_subject_topics($subject_id, $class_id = null)
+    {
+        $query = \App\Models\Topic::where('subject_id', $subject_id);
+        
+        // If class_id is provided, filter topics that are assigned to this class
+        if ($class_id) {
+            $query->whereHas('subject', function($q) use ($class_id) {
+                $q->where('my_class_id', $class_id);
+            });
+        }
+        
+        $topics = $query->select('id', 'name')
+            ->orderBy('name')
+            ->get();
+            
+        return $topics->map(function($topic) {
+            return [
+                'id' => $topic->id,
+                'name' => $topic->name
+            ];
+        })->all();
+    }
 }

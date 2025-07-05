@@ -44,34 +44,60 @@
         })
     }
 
-    function getClassSubjects(class_id){
+    function getClassSubjects(class_id) {
+        if (!class_id) {
+            // If no class is selected, clear dependent dropdowns
+            $('#section_id, #subject_id, #topic_id').empty().append('<option value="">Select Class First</option>');
+            return;
+        }
+
         var url = '{{ route('get_class_subjects', [':id']) }}';
         url = url.replace(':id', class_id);
         var section = $('#section_id');
         var subject = $('#subject_id');
+        var topic = $('#topic_id');
+
+        // Clear dependent dropdowns immediately when class changes
+        subject.empty().append('<option value="">Loading subjects...</option>');
+        topic.html('<option value="">Select Subject First</option>');
+        section.empty().append('<option value="">Loading sections...</option>');
 
         $.ajax({
             dataType: 'json',
             url: url,
             success: function (resp) {
-                console.log(resp);
-                section.empty();
-                subject.empty();
-                $.each(resp.sections, function (i, data) {
+                // Clear and reset sections dropdown
+                section.empty().append('<option value="">Select Section</option>');
+                $.each(resp.sections || [], function (i, data) {
                     section.append($('<option>', {
                         value: data.id,
                         text: data.name
                     }));
                 });
-                $.each(resp.subjects, function (i, data) {
-                    subject.append($('<option>', {
-                        value: data.id,
-                        text: data.name
-                    }));
-                });
+                
+                // Clear and reset subjects dropdown
+                subject.empty().append('<option value="">Select Subject</option>');
+                if (resp.subjects && resp.subjects.length > 0) {
+                    $.each(resp.subjects, function (i, data) {
+                        subject.append($('<option>', {
+                            value: data.id,
+                            text: data.name
+                        }));
+                    });
+                } else {
+                    subject.empty().append('<option value="">No subjects found for this class</option>');
+                }
 
+                // Clear topics since subject has changed
+                topic.html('<option value="">Select Subject First</option>');
+            },
+            error: function(xhr) {
+                console.error('Error loading class data:', xhr);
+                section.empty().append('<option value="">Error loading sections</option>');
+                subject.empty().append('<option value="">Error loading subjects</option>');
+                topic.html('<option value="">Select Subject First</option>');
             }
-        })
+        });
     }
 
 
