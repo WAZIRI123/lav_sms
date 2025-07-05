@@ -6,6 +6,7 @@ use App\Helpers\Qs;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Topic\TopicCreate;
 use App\Http\Requests\Topic\TopicUpdate;
+use App\Models\Topic;
 use App\Repositories\MyClassRepo;
 use App\Repositories\SubjectRepo;
 use App\Repositories\TopicRepo;
@@ -40,26 +41,73 @@ class TopicController extends Controller
         return redirect()->route('topics.index')->with('flash_success', __('msg.store_ok'));
     }
 
-    public function edit($id)
+    public function edit($topicId)
     {
-        $d['t'] = $topic = $this->topic->findTopic($id);
+        // First find the topic
+        $topic = Topic::with('subject.my_class')->find($topicId);
+        
+        if (!$topic) {
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Topic not found'
+                ], 404);
+            }
+            return Qs::goWithDanger('topics.index');
+        }
+        
+        // For AJAX requests, return JSON
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                't' => $topic,
+                'my_classes' => $this->my_class->all(),
+                'subjects' => $this->subject->findSubjectByClass($topic->subject->my_class_id)
+            ]);
+        }
+
+        $d['t'] = $topic;
         $d['my_classes'] = $this->my_class->all();
         $d['subjects'] = $this->subject->findSubjectByClass($topic->subject->my_class_id);
 
-        return is_null($topic) ? Qs::goWithDanger('topics.index') : view('pages.support_team.topics.edit', $d);
+        return view('pages.support_team.topics.edit', $d);
     }
 
-    public function update(TopicUpdate $req, $id)
+    public function update(TopicUpdate $req, $topicId)
     {
+        $topic = Topic::find($topicId);
+        if (!$topic) {
+            return redirect()->route('topics.index')->with('flash_danger', __('Topic not found'));
+        }
+        
         $data = $req->all();
-        $this->topic->updateTopic($id, $data);
+        $this->topic->updateTopic($topic->id, $data);
 
         return redirect()->route('topics.index')->with('flash_success', __('msg.update_ok'));
     }
 
-    public function destroy($id)
+    public function destroy($topicId)
     {
-        $this->topic->deleteTopic($id);
+        $topic = Topic::find($topicId);
+        if (!$topic) {
+            if (request()->ajax() || request()->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Topic not found'
+                ], 404);
+            }
+            return redirect()->route('topics.index')->with('flash_danger', __('Topic not found'));
+        }
+        
+        $this->topic->deleteTopic($topic->id);
+        
+        if (request()->ajax() || request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => __('Topic deleted successfully')
+            ]);
+        }
+        
         return redirect()->route('topics.index')->with('flash_success', __('msg.delete_ok'));
     }
 

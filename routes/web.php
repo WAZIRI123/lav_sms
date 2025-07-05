@@ -32,9 +32,9 @@ Route::group(['middleware' => 'auth'], function () {
         Route::group(['prefix' => 'topics'], function(){
             Route::get('/', 'TopicController@index')->name('topics.index');
             Route::post('/', 'TopicController@store')->name('topics.store');
-            Route::get('/{id}/edit', 'TopicController@edit')->name('topics.edit');
-            Route::put('/{id}', 'TopicController@update')->name('topics.update');
-            Route::delete('/{id}', 'TopicController@destroy')->name('topics.destroy');
+            Route::get('/{topic}/edit', 'TopicController@edit')->name('topics.edit');
+            Route::put('/{topic}', 'TopicController@update')->name('topics.update');
+            Route::delete('/{topic}', 'TopicController@destroy')->name('topics.destroy');
             
             // AJAX routes
             Route::get('/subjects/by-class/{class_id}', 'TopicController@getSubjectsByClass')

@@ -239,34 +239,87 @@ use Illuminate\Support\Str;
             });
 
             // Edit topic
-            $('.edit-topic').click(function(e) {
+            $(document).on('click', '.edit-topic', function(e) {
                 e.preventDefault();
                 var id = $(this).data('id');
-                var url = '{{ route("topics.edit", "") }}' + '/' + id;
+                // Build the URL manually to avoid double slashes
+                var baseUrl = '{{ route("topics.index") }}';
+                if (baseUrl.endsWith('/')) {
+                    baseUrl = baseUrl.slice(0, -1); // Remove trailing slash if present
+                }
+                var url = baseUrl + '/' + id + '/edit';
                 
-                $.get(url, function(data) {
-                    var topic = data.t;
-                    var formAction = '{{ route("topics.update", "") }}' + '/' + id;
-                    
-                    $('#edit-topic-form').attr('action', formAction);
-                    $('#edit_class_id').val(topic.subject.my_class_id).trigger('change');
-                    $('#edit_name').val(topic.name);
-                    $('#edit_competency').val(topic.competency);
-                    
-                    // Set subject after subjects are loaded
-                    setTimeout(function() {
-                        $('#edit_subject_id').val(topic.subject_id).trigger('change');
-                    }, 500);
-                    
-                    $('#edit-topic-modal').modal('show');
+                console.log('Fetching topic data from:', url);
+                
+                $.ajax({
+                    url: url,
+                    type: 'GET',
+                    dataType: 'json',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    },
+                    success: function(data) {
+                        console.log('Received topic data:', data);
+                        if (data.success && data.t) {
+                            var topic = data.t;
+                            // Build the update URL manually to avoid double slashes
+                            var updateBaseUrl = '{{ route("topics.index") }}';
+                            if (updateBaseUrl.endsWith('/')) {
+                                updateBaseUrl = updateBaseUrl.slice(0, -1); // Remove trailing slash if present
+                            }
+                            var formAction = updateBaseUrl + '/' + id;
+                            
+                            $('#edit-topic-form').attr('action', formAction);
+                            $('#edit_class_id').val(topic.subject.my_class_id).trigger('change');
+                            $('#edit_name').val(topic.name);
+                            $('#edit_competency').val(topic.competency);
+                            
+                            // Set subject after subjects are loaded
+                            setTimeout(function() {
+                                $('#edit_subject_id').val(topic.subject_id).trigger('change');
+                            }, 500);
+                            
+                            $('#edit-topic-modal').modal('show');
+                        } else {
+                            console.error('Invalid topic data format:', data);
+                            alert('Error: Invalid topic data received from server');
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error loading topic:', {
+                            status: xhr.status,
+                            statusText: xhr.statusText,
+                            responseText: xhr.responseText,
+                            error: error
+                        });
+                        var errorMsg = 'Error loading topic data. Please try again.\n\n' +
+                                    'Status: ' + xhr.status + ' ' + xhr.statusText + '\n';
+                        
+                        try {
+                            var response = JSON.parse(xhr.responseText);
+                            if (response.message) {
+                                errorMsg += 'Message: ' + response.message;
+                            }
+                        } catch (e) {
+                            errorMsg += 'Response: ' + (xhr.responseText || 'No response');
+                        }
+                        
+                        alert(errorMsg);
+                    }
                 });
             });
 
             // Delete topic
-            $('.delete-topic').click(function(e) {
+            $(document).on('click', '.delete-topic', function(e) {
                 e.preventDefault();
                 var id = $(this).data('id');
-                var url = '{{ route("topics.destroy", "") }}' + '/' + id;
+                // Build the delete URL manually to avoid double slashes
+                var baseUrl = '{{ route("topics.index") }}';
+                if (baseUrl.endsWith('/')) {
+                    baseUrl = baseUrl.slice(0, -1); // Remove trailing slash if present
+                }
+                var url = baseUrl + '/' + id;
                 
                 if (confirm('@lang('Are you sure you want to delete this topic?')')) {
                     $.ajax({
@@ -278,6 +331,10 @@ use Illuminate\Support\Str;
                         },
                         success: function() {
                             window.location.reload();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error deleting topic:', error);
+                            alert('Error deleting topic. Please try again.');
                         }
                     });
                 }
