@@ -6,11 +6,17 @@ Auth::routes();
 Route::get('/privacy-policy', 'HomeController@privacy_policy')->name('privacy_policy');
 Route::get('/terms-of-use', 'HomeController@terms_of_use')->name('terms_of_use');
 
-
+// Add this with your other routes, before the auth middleware group
+Route::get('/clear-cache', function() {
+    $exitCode = Artisan::call('cache:clear');
+    $exitCode = Artisan::call('config:clear');
+    $exitCode = Artisan::call('view:clear');
+    return 'Caches cleared!'; // This will be displayed when you visit /clear-cache
+})->name('clear.cache');
 Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/', 'HomeController@dashboard')->name('home');
-    Route::get('/home', 'HomeController@dashboard')->name('home');
+    Route::get('/home', 'HomeController@dashboard')->name('home_alt');
     Route::get('/dashboard', 'HomeController@dashboard')->name('dashboard');
 
     Route::group(['prefix' => 'my_account'], function() {
