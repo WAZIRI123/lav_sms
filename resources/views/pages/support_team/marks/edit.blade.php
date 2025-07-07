@@ -6,9 +6,8 @@
             <th>S/N</th>
             <th>Name</th>
             <th>ADM_NO</th>
-            <th>1ST AOI (10)</th>
-            <th>2ND AOI (10)</th>
-            <th>EXAM (80)</th>
+            <th>A.O.I Score</th>
+            <th>Exam Marks X/80</th>
         </tr>
         </thead>
         <tbody>
@@ -18,9 +17,8 @@
                 <td>{{ $mk->user->name }} </td>
                 <td>{{ $mk->user->student_record->adm_no }}</td>
 
-                <td><input title="1ST AOI" min="1" max="10" class="text-center" name="t1_{{ $mk->id }}" value="{{ $mk->t1 }}" type="number"></td>
-                <td><input title="2ND AOI" min="1" max="10" class="text-center" name="t2_{{ $mk->id }}" value="{{ $mk->t2 }}" type="number"></td>
-                <td><input title="EXAM" min="1" max="80" class="text-center" name="exm_{{ $mk->id }}" value="{{ $mk->exm }}" type="number"></td>
+                <td><input title="A.O.I Score" min="0" max="10" step="0.01" class="text-center" name="t1_{{ $mk->id }}" value="{{ $mk->t1 }}" type="number"></td>
+                <td><input title="Exam Marks X/80" min="0" max="80" step="0.01" class="text-center" name="exm_{{ $mk->id }}" value="{{ $mk->exm }}" type="number"></td>
 
             </tr>
         @endforeach

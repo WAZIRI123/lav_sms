@@ -25,11 +25,11 @@ class Mk extends Qs
     {
         if($number < 1){ return NULL;}
 
-        $ends = array('th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th');
-        if ((($number % 100) >= 11) && (($number % 100) <= 13))
-            return $number . '<sup>th</sup>';
-        else
-            return $number . '<sup>' . $ends[$number % 10] . '</sup>';
+        $ends = ['th', 'st', 'nd', 'rd', 'th', 'th', 'th', 'th', 'th', 'th'];
+        $suffix = (($number % 100) >= 11 && ($number % 100) <= 13) ? 'th' : $ends[$number % 10];
+        
+        // Return the number with the suffix in superscript
+        return $number . '<sup>' . $suffix . '</sup>';
     }
 
     /*Get Subject Total Per Term*/

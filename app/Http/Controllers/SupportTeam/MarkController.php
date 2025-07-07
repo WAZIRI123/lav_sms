@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SupportTeam;
 
 use App\Helpers\Qs;
+use App\Models\Mark;
 use App\Helpers\Mk;
 use App\Http\Requests\Mark\MarkSelector;
 use App\Models\Setting;
@@ -77,16 +78,59 @@ class MarkController extends Controller
         }
 
         $wh = ['student_id' => $student_id, 'year' => $year ];
-        $d['marks'] = $this->exam->getMark($wh);
+        $d['marks'] = $marks = $this->exam->getMark($wh);
         $d['exam_records'] = $exr = $this->exam->getRecord($wh);
         $d['exams'] = $this->exam->getExam(['year' => $year]);
-        $d['sr'] = $this->student->getRecord(['user_id' => $student_id])->first();
+        $d['sr'] = $sr = $this->student->getRecord(['user_id' => $student_id])->first();
         $d['my_class'] = $mc = $this->my_class->getMC(['id' => $exr->first()->my_class_id])->first();
         $d['class_type'] = $this->my_class->findTypeByClass($mc->id);
-        $d['subjects'] = $this->my_class->findSubjectByClass($mc->id);
+        $d['subjects'] = $subjects = $this->my_class->findSubjectByClass($mc->id);
         $d['year'] = $year;
         $d['student_id'] = $student_id;
         $d['skills'] = $this->exam->getSkillByClassType() ?: NULL;
+
+        // Calculate subject positions
+        $subjectPositions = [];
+        foreach ($subjects as $subject) {
+            // Get all marks for this subject across all students in the class
+            $classMarks = Mark::where([
+                'year' => $year,
+                'subject_id' => $subject->id,
+                'my_class_id' => $mc->id
+            ])->get();
+
+            // Calculate total for each student
+            $studentTotals = [];
+            foreach ($classMarks as $mark) {
+                $total = ($mark->t1 ?? 0) + ($mark->tca ?? 0) + ($mark->exm ?? 0);
+                $studentTotals[$mark->student_id] = $total;
+            }
+
+            // Sort by total in descending order
+            arsort($studentTotals);
+
+            // Assign positions (handling ties)
+            $position = 1;
+            $prevScore = null;
+            $positions = [];
+            $count = 1;
+            
+            foreach ($studentTotals as $studentId => $score) {
+                if ($prevScore !== null && $score < $prevScore) {
+                    $position = $count;
+                }
+                $positions[$studentId] = $position;
+                $prevScore = $score;
+                $count++;
+            }
+
+            // Store the position for the current student
+            if (isset($positions[$student_id])) {
+                $subjectPositions[$subject->id] = $positions[$student_id];
+            }
+        }
+
+        $d['subject_positions'] = $subjectPositions;
         //$d['ct'] = $d['class_type']->code;
         //$d['mark_type'] = Qs::getMarkType($d['ct']);
 
@@ -107,6 +151,67 @@ class MarkController extends Controller
                 return redirect()->route('pins.enter', Qs::hash($student_id));
             }
         }
+
+        if(!$this->verifyStudentExamYear($student_id, $year)){
+            return $this->noStudentRecord();
+        }
+
+        $wh = ['student_id' => $student_id, 'year' => $year, 'exam_id' => $exam_id];
+        $d['marks'] = $marks = $this->exam->getMark($wh);
+        $d['exam_records'] = $exr = $this->exam->getRecord($wh);
+        $d['ex'] = $this->exam->find($exam_id);
+        $d['sr'] = $sr = $this->student->getRecord(['user_id' => $student_id])->first();
+        $d['my_class'] = $mc = $this->my_class->getMC(['id' => $exr->first()->my_class_id])->first();
+        $d['class_type'] = $this->my_class->findTypeByClass($mc->id);
+        $d['subjects'] = $subjects = $this->my_class->findSubjectByClass($mc->id);
+        $d['year'] = $year;
+        $d['student_id'] = $student_id;
+        $d['skills'] = $this->exam->getSkillByClassType() ?: NULL;
+        $d['skill_type'] = $this->exam->getSkillByClassType($d['class_type']->code) ?: NULL;
+
+        // Calculate subject positions
+        $subjectPositions = [];
+        foreach ($subjects as $subject) {
+            // Get all marks for this subject across all students in the class
+            $classMarks = Mark::where([
+                'year' => $year,
+                'subject_id' => $subject->id,
+                'my_class_id' => $mc->id,
+                'exam_id' => $exam_id
+            ])->get();
+
+            // Calculate total for each student
+            $studentTotals = [];
+            foreach ($classMarks as $mark) {
+                $total = ($mark->t1 ?? 0) + ($mark->tca ?? 0) + ($mark->exm ?? 0);
+                $studentTotals[$mark->student_id] = $total;
+            }
+
+            // Sort by total in descending order
+            arsort($studentTotals);
+
+            // Assign positions (handling ties)
+            $position = 1;
+            $prevScore = null;
+            $positions = [];
+            $count = 1;
+            
+            foreach ($studentTotals as $studentId => $score) {
+                if ($prevScore !== null && $score < $prevScore) {
+                    $position = $count;
+                }
+                $positions[$studentId] = $position;
+                $prevScore = $score;
+                $count++;
+            }
+
+            // Store the position for the current student
+            if (isset($positions[$student_id])) {
+                $subjectPositions[$subject->id] = $positions[$student_id];
+            }
+        }
+
+        $d['subject_positions'] = $subjectPositions;
 
         if(!$this->verifyStudentExamYear($student_id, $year)){
             return $this->noStudentRecord();
@@ -209,8 +314,7 @@ class MarkController extends Controller
             $all_st_ids[] = $mk->student_id;
 
                 $d['t1'] = $t1 = $mks['t1_'.$mk->id];
-                $d['t2'] = $t2 = $mks['t2_'.$mk->id];
-                $d['tca'] = $tca = $t1 + $t2;
+                $d['tca'] = $tca = ($t1/3)*20;
                 $d['exm'] = $exm = $mks['exm_'.$mk->id];
 
 
