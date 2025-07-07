@@ -25,6 +25,11 @@ class Topic extends Model
         return $this->belongsTo(Subject::class);
     }
 
+    public function my_class()
+    {
+        return $this->belongsTo(MyClass::class);
+    }
+
     /**
      * Scope a query to only include topics for a specific subject.
      *

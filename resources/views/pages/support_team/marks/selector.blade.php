@@ -43,7 +43,7 @@
 
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label for="subject_id" class="col-form-label font-weight-bold">Subject:</label>
+                                <label for="subject_id" class="col-form-label font-weight-bold">Subject: </label>
                                 <select required id="subject_id" name="subject_id" onchange="getSubjectTopics(this.value)" data-placeholder="Select Class First" class="form-control select-search">
                                   @if($selected)
                                         @foreach($subjects->where('my_class_id', $my_class_id) as $s)
@@ -53,27 +53,27 @@
                                 </select>
                             </div>
                         </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="topic_id" class="col-form-label font-weight-bold">Topic (Optional):</label>
-                                <select id="topic_id" name="topic_id" data-placeholder="Select Subject First" class="form-control select">
-                                    @if($selected && isset($topics) && $topics->isNotEmpty())
-                                        @foreach($topics as $topic)
-                                            <option value="{{ $topic->id }}">{{ $topic->name }}</option>
-                                        @endforeach
-                                    @endif
-                                </select>
+                        <div class="col-md-2 mt-1 mx-auto" >
+                            <div class="text-right mt-1">
+                                <button type="submit" class="btn btn-primary">Manage Marks <i class="icon-paperplane ml-2"></i></button>
                             </div>
                         </div>
+                       
                     </div>
 
                 </fieldset>
             </div>
 
-            <div class="col-md-2 mt-4">
-                <div class="text-right mt-1">
-                    <button type="submit" class="btn btn-primary">Manage Marks <i class="icon-paperplane ml-2"></i></button>
+            <div class="col-md-2">
+                <div class="form-group">
+                    <label for="topic_id" class="col-form-label font-weight-bold">Topic: </label>
+                    <select required id="topic_id" name="topic_id" data-placeholder="Select Topic" class="form-control select">
+                        @if($selected && isset($topics) && $topics->isNotEmpty())
+                            @foreach($topics as $topic)
+                                <option value="{{ $topic->id }}" {{ ($topic_id == $topic->id) ? 'selected' : '' }}>{{ $topic->name }}</option>
+                            @endforeach
+                        @endif
+                    </select>
                 </div>
             </div>
 
@@ -82,6 +82,9 @@
     </form>
 
     <script>
+        // Store the selected topic ID from PHP
+        var selectedTopicId = '{{ $topic_id ?? '' }}';
+
         // Function to get topics for the selected subject and class
         function getSubjectTopics(subjectId) {
             var topicSelect = $('#topic_id');
@@ -110,7 +113,8 @@
                     var options = '<option value="">Select Topic (Optional)</option>';
                     if (data && data.length > 0) {
                         $.each(data, function(key, topic) {
-                            options += '<option value="' + topic.id + '">' + topic.name + '</option>';
+                            var selected = (topic.id == selectedTopicId) ? 'selected' : '';
+                            options += '<option value="' + topic.id + '" ' + selected + '>' + topic.name + '</option>';
                         });
                     } else {
                         options = '<option value="">No topics found for this subject</option>';
@@ -135,6 +139,7 @@
             $('#my_class_id').on('change', function() {
                 // The getClassSubjects function will handle clearing and repopulating subjects
                 // and triggering the subject change event if needed
+                selectedTopicId = ''; // Clear selected topic when class changes
             });
             
             // If subject is pre-selected (e.g., form validation failed), load its topics

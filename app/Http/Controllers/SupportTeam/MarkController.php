@@ -140,7 +140,7 @@ class MarkController extends Controller
 
     public function selector(MarkSelector $req)
     {
-        $data = $req->only(['exam_id', 'my_class_id', 'section_id', 'subject_id']);
+        $data = $req->only(['exam_id', 'my_class_id', 'section_id', 'subject_id', 'topic_id']);
         $d2 = $req->only(['exam_id', 'my_class_id', 'section_id']);
         $d = $req->only(['my_class_id', 'section_id']);
         $d['session'] = $data['year'] = $d2['year'] = $this->year;
@@ -155,15 +155,22 @@ class MarkController extends Controller
             $this->exam->createMark($data);
             $this->exam->createRecord($d2);
         }
-
-        return redirect()->route('marks.manage', [$req->exam_id, $req->my_class_id, $req->section_id, $req->subject_id]);
+        
+        return redirect()->route('marks.manage', [
+            'exam' => $req->exam_id,
+            'class' => $req->my_class_id,
+            'section' => $req->section_id,
+            'subject' => $req->subject_id,
+            'topic' => $req->topic_id,
+        ]);
     }
 
-    public function manage($exam_id, $class_id, $section_id, $subject_id)
+    public function manage($exam_id, $class_id, $section_id, $subject_id, $topic_id)
     {
-        $d = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'year' => $this->year];
+        $d = ['exam_id' => $exam_id, 'my_class_id' => $class_id, 'section_id' => $section_id, 'subject_id' => $subject_id, 'topic_id' => $topic_id,'year' => $this->year];
 
         $d['marks'] = $this->exam->getMark($d);
+
         if($d['marks']->count() < 1){
             return $this->noStudentRecord();
         }
@@ -177,7 +184,9 @@ class MarkController extends Controller
             $d['subjects'] = $this->my_class->findSubjectByTeacher(Auth::user()->id)->where('my_class_id', $class_id);
         }
         $d['selected'] = true;
+        $d['topics'] = $this->my_class->getAllTopics();
         $d['class_type'] = $this->my_class->findTypeByClass($class_id);
+        
 
         return view('pages.support_team.marks.manage', $d);
     }

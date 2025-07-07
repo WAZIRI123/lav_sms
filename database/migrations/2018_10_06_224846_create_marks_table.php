@@ -20,6 +20,7 @@ class CreateMarksTable extends Migration
             $table->unsignedInteger('my_class_id');
             $table->unsignedInteger('section_id');
             $table->unsignedInteger('exam_id');
+            $table->unsignedInteger('topic_id');
             $table->integer('t1')->nullable();
             $table->integer('t2')->nullable();
             $table->integer('t3')->nullable();
