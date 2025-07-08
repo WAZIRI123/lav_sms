@@ -34,20 +34,49 @@ class SettingController extends Controller
         $sets['lock_exam'] = $sets['lock_exam'] == 1 ? 1 : 0;
         $keys = array_keys($sets);
         $values = array_values($sets);
+        
+        // Update all settings except logo
         for($i=0; $i<count($sets); $i++){
             $this->setting->update($keys[$i], $values[$i]);
         }
 
+        // Handle logo upload if present
         if($req->hasFile('logo')) {
             $logo = $req->file('logo');
-            $f = Qs::getFileMetaData($logo);
-            $f['name'] = 'logo.' . $f['ext'];
-            $f['path'] = $logo->storeAs(Qs::getPublicUploadPath(), $f['name']);
-            $logo_path = asset('storage/' . $f['path']);
-            $this->setting->update('logo', $logo_path);
+            
+            // Validate file type
+            $validExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+            $extension = strtolower($logo->getClientOriginalExtension());
+            
+            if (!in_array($extension, $validExtensions)) {
+                return back()->with('flash_danger', 'Invalid file type. Please upload a valid image (jpg, jpeg, png, gif)');
+            }
+            
+            try {
+                // Ensure upload directory exists
+                $uploadPath = storage_path('app/public/' . Qs::getPublicUploadPath());
+                if (!file_exists($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                
+                // Generate unique filename
+                $filename = 'logo_' . time() . '.' . $extension;
+                $path = $logo->storeAs('public/' . Qs::getPublicUploadPath(), $filename);
+                
+                if ($path) {
+                    // Update logo path in database
+                    $logoPath = 'storage/' . Qs::getPublicUploadPath() . $filename;
+                    $this->setting->update('logo', $logoPath);
+                } else {
+                    return back()->with('flash_danger', 'Failed to upload logo. Please try again.');
+                }
+                
+            } catch (\Exception $e) {
+                \Log::error('Logo upload error: ' . $e->getMessage());
+                return back()->with('flash_danger', 'An error occurred while uploading the logo.');
+            }
         }
 
         return back()->with('flash_success', __('msg.update_ok'));
-
     }
 }
