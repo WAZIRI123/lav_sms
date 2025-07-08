@@ -180,7 +180,8 @@
             <p style="font-size: 12px;">REPORT SHEET {{ '('.strtoupper($class_type->name).')' }}</p>
         </div>
         <div class="student-photo">
-            <img src="{{ $studentPhoto }}" alt="Student Photo">
+            {{-- $studentPhoto?? --}}
+            <img src="{{ asset('global_assets/images/placeholders/placeholder.jpg') }}" alt="Student Photo">
         </div>
     </div>
 

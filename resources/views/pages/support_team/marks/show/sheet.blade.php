@@ -8,10 +8,9 @@
     $currentTerm = Qs::getSetting('current_term') ?? 1;
     
     // Get exam information
-    $exam = $exams->first();
-    $examName = $exam->name ?? '';
-    $examYear = $exam->year ?? $currentYear;
-    $examTerm = $exam->term ?? $currentTerm;
+    $examName = $ex->name ?? '';
+    $examYear = $ex->year ?? $currentYear;
+    $examTerm = $ex->term ?? $currentTerm;
     
     // Get student information
     $studentName = $sr->user->name ?? '';
@@ -22,65 +21,208 @@
     $classFullName = trim("$className $sectionName");
     
     // Get school logo path
-    $schoolLogo = Qs::getSetting('school_logo') ? asset('storage/' . Qs::getSetting('school_logo')) : asset('global_assets/images/placeholders/placeholder.jpg');
+    $schoolLogo = Qs::getSetting('logo') ?? asset('global_assets/images/placeholders/placeholder.jpg');
     
     // Get student photo
-    $studentPhoto = $sr->user->photo ? asset('storage/' . $sr->user->photo) : asset('global_assets/images/placeholders/placeholder.jpg');
+    $studentPhoto = $sr->user->photo ?? asset('global_assets/images/placeholders/placeholder.jpg');
+    
+    // Set print-specific styles
+    $printStyles = "
+        @page { 
+            size: A4; 
+            margin: 10mm; 
+        }
+        body { 
+            font-family: Arial, sans-serif; 
+            font-size: 12pt;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .marksheet-container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            padding: 20px; 
+        }
+        .school-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 20px; 
+            border-bottom: 2px solid #000; 
+            padding-bottom: 15px; 
+        }
+        .school-logo { 
+            width: 80px; 
+            height: 80px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
+        .school-logo img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: contain; 
+        }
+        .school-info { 
+            text-align: center; 
+            flex-grow: 1; 
+        }
+        .school-info h2 { 
+            margin: 0; 
+            font-size: 20px; 
+            font-weight: bold; 
+        }
+        .school-info p { 
+            margin: 5px 0; 
+            font-size: 12px; 
+        }
+        .student-photo { 
+            width: 80px; 
+            height: 100px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+            border: 1px solid #ddd; 
+        }
+        .student-photo img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            object-fit: cover; 
+        }
+        .document-title { 
+            text-align: center; 
+            margin: 15px 0 10px; 
+        }
+        .document-title h3 { 
+            margin: 0; 
+            font-size: 18px; 
+            text-decoration: underline; 
+        }
+        .student-info { 
+            width: 100%;
+            margin-bottom: 20px;
+            margin-left: auto;
+            margin-right: auto;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        .student-info td {
+            padding: 8px;
+            vertical-align: top;
+        }
+    
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 20px; 
+            font-size: 11pt;
+        }
+        th, td { 
+            border: 1px solid #000; 
+            padding: 8px; 
+            text-align: left; 
+        }
+        th { 
+            background-color: #f0f0f0; 
+            text-align: center; 
+            font-weight: bold; 
+        }
+        .summary { 
+            text-align: right; 
+            margin-top: 10px; 
+            font-weight: bold; 
+            font-size: 12pt; 
+        }
+        @media print {
+            body { 
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .no-print { 
+                display: none !important; 
+            }
+            .page-break { 
+                page-break-before: always; 
+            }
+            table { 
+                page-break-inside: auto;
+            }
+            tr { 
+                page-break-inside: avoid;
+                page-break-after: auto;
+            }
+        }
+    ";
 @endphp
 
-<div class="marksheet-container" style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; border: 1px solid #ddd;">
-    <!-- School Header -->
-    <div class="school-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 15px;">
-        <div class="school-logo" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-            <img src="{{ $s['logo'] }}" alt="School Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+<style>
+    {{ $printStyles }}
+</style>
+
+<div class="marksheet-container" style="font-family: Arial, sans-serif; max-width: 1000px; margin: 0 auto; padding: 20px; border: 1px solid #ddd; background-color: #fff0f5;">
+      <!-- School Header -->
+      <div class="school-header">
+        <div class="school-logo">
+            <img src="{{ $schoolLogo }}" alt="School Logo">
         </div>
-        <div class="school-info" style="text-align: center; flex-grow: 1;">
-            <h2 style="margin: 0; font-size: 20px; font-weight: bold;">{{ strtoupper($schoolName) }}</h2>
-            <p style="margin: 5px 0; font-style: italic;">{{ $schoolMotto }}</p>
-            <p style="margin: 5px 0; font-size: 12px;">{{ $schoolAddress }}, {{ $schoolPhone }}</p>
+        <div class="school-info">
+            <h2>{{ $schoolName }}</h2>
+            <p style="font-style: italic;">{{ $schoolMotto }}</p>
+            <p style="font-size: 12px;">{{ $schoolAddress }}, {{ $schoolPhone }}</p>
+            @if(isset($class_type) && $class_type)
+            <p style="font-size: 12px;">REPORT SHEET ({{ strtoupper($class_type->name) }})</p>
+            @endif
         </div>
-        <div class="student-photo" style="width: 80px; height: 100px; display: flex; align-items: center; justify-content: center; overflow: hidden; border: 1px solid #ddd;">
-            <img src="{{ $studentPhoto }}" alt="Student Photo" style="max-width: 100%; max-height: 100%; object-fit: cover;">
+        <div class="student-photo">
+            <img src="{{ $studentPhoto }}" alt="Student Photo">
         </div>
     </div>
-
     <!-- Document Title -->
-    <div class="document-title" style="text-align: center; margin: 15px 0 20px;">
-        <h3 style="margin: 0; font-size: 18px; text-decoration: underline;">LEARNER'S {{ strtoupper($examName) }} ASSESSMENT SCORES, {{ $examYear }}</h3>
+    <div class="document-title">
+        <h3>LEARNER'S {{ strtoupper($examName) }} ASSESSMENT SCORES, {{ $examYear }}</h3>
     </div>
 
     <!-- Student Information -->
-    <div class="student-info" style="margin-bottom: 20px; border: 1px solid #ddd; padding: 10px; background-color: #f9f9f9;">
-        <div style="display: flex; margin-bottom: 5px;">
-            <div style="width: 50%;"><strong>NAME:</strong> {{ strtoupper($studentName) }}</div>
-            <div><strong>STUDENT ID:</strong> {{ $studentId }}</div>
+    <div style="display: flex;  gap: 20px; margin-bottom: 1px;">
+        <!-- Left Box -->
+        <div style=" padding-top:0.5rem; padding-bottom:0.5rem; flex: 1;">
+            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>NAME:</strong> {{ strtoupper($studentName) }}</div>
+            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>STUDENT ID:</strong> {{ strtoupper($studentId) }}</div>
+           
         </div>
-        <div style="display: flex; margin-bottom: 5px;">
-            <div style="width: 50%;"><strong>YEAR:</strong> {{ $examYear }}</div>
-            <div><strong>SEX:</strong> {{ strtoupper($studentGender) }}</div>
+        
+        <!-- Right Box -->
+        <div style=" padding-top:0.5rem; padding-bottom:0.5rem; flex: 1;">
+            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>SEX:</strong> {{ strtoupper($studentGender) }}</div>
+         
+            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>CLASS:</strong> {{ $classFullName }}</div>
+           
         </div>
-        <div style="display: flex; margin-bottom: 5px;">
-            <div style="width: 50%;"><strong>CLASS:</strong> {{ $classFullName }}</div>
-            <div><strong>TERM:</strong> {{ $examTerm }}</div>
+
+          <!-- Right Box -->
+          <div style=" padding-top:0.5rem; padding-bottom:0.5rem; flex: 1;">
+            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>TERM:</strong> {{ $examTerm }}</div>
+         
+            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>YEAR:</strong> {{ $examYear }}</div>
+           
         </div>
-        <div style="display: flex;">
-            <div style="width: 50%;"><strong>EXAM:</strong> {{ $examName }}</div>
-            <div><strong>DATE:</strong> {{ date('d/m/Y') }}</div>
-        </div>
+
     </div>
 
     <!-- Marks Table -->
-    <table class="marks-table" style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+    <table class="marks-table">
         <thead>
-            <tr style="background-color: #f0f0f0;">
-                <th style="border: 1px solid #000; padding: 8px; text-align: left;">SUBJECTS</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: left;">CHAPTER</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: left;">COMPETENCY</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: center;">A.O.I SCORE</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: center;">RAW MARKS X/20</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: center;">EXAM X/80</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: center;">TOTAL 100%</th>
-                <th style="border: 1px solid #000; padding: 8px; text-align: center;">GRADE</th>
+            <tr>
+                <th style="text-align: left;">SUBJECTS</th>
+                <th style="text-align: left;">CHAPTER</th>
+                <th style="text-align: left;">COMPETENCY</th>
+                <th style="text-align: center;">A.O.I SCORE</th>
+                <th style="text-align: center;">RAW MARKS X/20</th>
+                <th style="text-align: center;">EXAM X/80</th>
+                <th style="text-align: center;">TOTAL 100%</th>
+                <th style="text-align: center;">GRADE</th>
             </tr>
         </thead>
         <tbody>
@@ -95,14 +237,14 @@
                     elseif ($total >= 50) $grade = 'D';
                 @endphp
                 <tr>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: left;">{{ $mk->subject->name ?? 'N/A' }}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: left;">{{ $mk->topic->name ?? 'N/A' }}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: left;">{{ $mk->topic->competency ?? 'N/A' }}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center;">{{ ($mk->t1) ? number_format($mk->t1, 1) : '-' }}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center;">{{ ($mk->tca) ? number_format($mk->tca, 1) : '-' }}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center;">{{ ($mk->exm) ? number_format($mk->exm, 1) : '-' }}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center;">{{ number_format($total, 1) }}</td>
-                    <td style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold;">{{ $grade }}</td>
+                    <td>{{ $mk->subject->name ?? 'N/A' }}</td>
+                    <td>{{ $mk->topic->name ?? 'N/A' }}</td>
+                    <td>{{ $mk->topic->competency ?? 'N/A' }}</td>
+                    <td style="text-align: center;">{{ ($mk->t1) ? number_format($mk->t1, 1) : '-' }}</td>
+                    <td style="text-align: center;">{{ ($mk->tca) ? number_format($mk->tca, 1) : '-' }}</td>
+                    <td style="text-align: center;">{{ ($mk->exm) ? number_format($mk->exm, 1) : '-' }}</td>
+                    <td style="text-align: center;">{{ number_format($total, 1) }}</td>
+                    <td style="text-align: center; font-weight: bold;">{{ $grade }}</td>
                 </tr>
             @endforeach
         </tbody>
@@ -110,10 +252,11 @@
 
     <!-- Summary Section -->
     @if(isset($exr))
-    <div class="summary" style="margin-top: 20px; text-align: right; font-weight: bold;">
-        <div style="margin-bottom: 5px;">TOTAL SCORES OBTAINED: {{ $exr->total ?? 'N/A' }}</div>
-        <div style="margin-bottom: 5px;">FINAL AVERAGE: {{ $exr->ave ?? 'N/A' }}</div>
+    <div class="summary" style="display: flex; justify-content: space-between; width: 100%;">
+        <div style="margin-right: 20px;">TOTAL SCORES OBTAINED: {{ $exr->total ?? 'N/A' }}</div>
+        <div style="margin-right: 20px;">FINAL AVERAGE: {{ $exr->ave ?? 'N/A' }}</div>
         <div>CLASS AVERAGE: {{ $exr->class_ave ?? 'N/A' }}</div>
     </div>
     @endif
+
 </div>
