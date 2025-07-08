@@ -17,7 +17,16 @@ class ExamCreate extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'term' => 'required|numeric',
+            'term' => [
+                'required',
+                'numeric',
+                function ($attribute, $value, $fail) {
+                    $exists = \App\Models\Exam::where('term', $value)->exists();
+                    if ($exists) {
+                        $fail('An exam with this term already exists.');
+                    }
+                },
+            ],
         ];
     }
 

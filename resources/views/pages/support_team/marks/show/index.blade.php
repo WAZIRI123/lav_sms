@@ -20,7 +20,10 @@
                     <div class="card-body collapse">
 
                         {{--Sheet Table--}}
-                        @include('pages.support_team.marks.show.sheet')
+                        @php
+                            $filtered_marks = $marks->where('exam_id', $ex->id);
+                        @endphp
+                        @include('pages.support_team.marks.show.sheet', ['marks' => $filtered_marks])
 
                         {{--Print Button--}}
                         <div class="text-center mt-3">

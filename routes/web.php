@@ -151,8 +151,14 @@ Route::group(['middleware' => 'auth'], function () {
 
             Route::get('select_year/{id}', 'MarkController@year_selector')->name('marks.year_selector');
             Route::post('select_year/{id}', 'MarkController@year_selected')->name('marks.year_select');
-            Route::get('show/{id}/{year}', 'MarkController@show')->name('marks.show');
-            Route::get('print/{id}/{exam_id}/{year}', 'MarkController@print_view')->name('marks.print');
+            
+            // Term selection routes
+            Route::get('select_term/{id}/{year}', 'MarkController@term_selector')->name('marks.term_selector');
+            Route::post('select_term/{id}/{year}', 'MarkController@term_selected')->name('marks.term_select');
+            
+            // Show mark sheet with optional term
+            Route::get('show/{id}/{year}/{term?}', 'MarkController@show')->name('marks.show');
+            Route::get('print/{id}/{exam_id}/{year}/{term?}', 'MarkController@print_view')->name('marks.print');
 
         });
 
