@@ -45,9 +45,8 @@ class MarkRepo
         $d = ['student_id' => $st_id, 'exam_id' => $exam->id, 'my_class_id' => $class_id, 'year' => $year];
 
         $tex = 'tex'.$exam->term;
-        $mk =Mark::where($d);
+        $mk = Mark::where($d);
         return $mk->select($tex)->sum($tex);
-
       /*  unset($d['exam_id']);
         $mk =Mark::where($d);
         $t1 = $mk->select('tex1')->sum('tex1');

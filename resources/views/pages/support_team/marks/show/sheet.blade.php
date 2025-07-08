@@ -18,7 +18,7 @@
 
     @foreach($marks as $mk)
         @php
-            $total = ($mk->t1 ?? 0) + ($mk->tca ?? 0) + ($mk->exm ?? 0);
+            $total = ($mk->tca ?? 0) + ($mk->exm ?? 0);
             // Calculate grade
             $grade = 'F';
             if ($total >= 80) $grade = 'A';
@@ -40,6 +40,7 @@
         </tr>
     @endforeach
     @if(isset($exr))
+    
     <tr>
         <td colspan="4"><strong>TOTAL SCORES OBTAINED: </strong> {{ $exr->total ?? 'N/A' }}</td>
         <td colspan="3"><strong>FINAL AVERAGE: </strong> {{ $exr->ave ?? 'N/A' }}</td>
