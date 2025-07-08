@@ -93,7 +93,7 @@
         }
         .document-title { 
             text-align: center; 
-            margin: 15px 0 20px; 
+            margin: 15px 0 10px; 
         }
         .document-title h3 { 
             margin: 0; 
@@ -190,21 +190,30 @@
     </div>
 
     <!-- Student Information -->
-    <div style="display: flex;  gap: 20px; margin-bottom: 20px;">
+    <div style="display: flex;  gap: 20px; margin-bottom: 1px;">
         <!-- Left Box -->
-        <div style=" padding-top:1rem; padding-bottom:1rem; flex: 1;">
+        <div style=" padding-top:0.5rem; padding-bottom:0.5rem; flex: 1;">
             <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>NAME:</strong> {{ strtoupper($studentName) }}</div>
             <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>STUDENT ID:</strong> {{ strtoupper($studentId) }}</div>
            
         </div>
         
         <!-- Right Box -->
-        <div style=" padding-top:1rem; padding-bottom:1rem; flex: 1;">
-            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>YEAR:</strong> {{ $examYear }}</div>
+        <div style=" padding-top:0.5rem; padding-bottom:0.5rem; flex: 1;">
+            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>SEX:</strong> {{ strtoupper($studentGender) }}</div>
          
             <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>CLASS:</strong> {{ $classFullName }}</div>
            
         </div>
+
+          <!-- Right Box -->
+          <div style=" padding-top:0.5rem; padding-bottom:0.5rem; flex: 1;">
+            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>TERM:</strong> {{ $examTerm }}</div>
+         
+            <div style=" width: 80%; margin-left: auto; margin-right: auto; padding: 10px; font-size:14px; text-align: center;"><strong>YEAR:</strong> {{ $examYear }}</div>
+           
+        </div>
+
     </div>
 
     <!-- Marks Table -->

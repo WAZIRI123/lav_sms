@@ -1,47 +1,43 @@
-<div>
-    {{--KEYS TO RATING--}}
-    <div style="float: left">
-        <br>
-        <strong style="text-decoration: underline;">KEY</strong> <br>
-        <span>5 - Excellent</span> <br>
-        <span>4 - Very Good</span> <br>
-        <span>3 - Good</span> <br>
-        <span>2 - Fair</span> <br>
-        <span>1 - Poor</span> <br>
+<div style="font-family: Arial, sans-serif; max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;">
+
+  <div style="display: flex; margin-bottom: 20px; width: 100%;">
+        <!-- Grading Scale Table -->
+        <div style="flex: 1; margin-right: 20px;">
+            <table style="width: 100%; border-collapse: collapse; border: 1px solid #000;" border="1">
+                <thead>
+                    <tr>
+                        <th colspan="2" style="text-align: center; padding: 5px; background-color: #f0f0f0;">GRADING SCALE</th>
+                    </tr>
+                    <tr>
+                        <th style="padding: 5px; text-align: center;">MARKS%</th>
+                        <th style="padding: 5px; text-align: center;">GRADE</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td style="padding: 5px; text-align: center;">80 - 100</td><td style="padding: 5px; text-align: center;">A</td></tr>
+                    <tr><td style="padding: 5px; text-align: center;">65 - 79</td><td style="padding: 5px; text-align: center;">B</td></tr>
+                    <tr><td style="padding: 5px; text-align: center;">50 - 64</td><td style="padding: 5px; text-align: center;">C</td></tr>
+                    <tr><td style="padding: 5px; text-align: center;">35 - 49</td><td style="padding: 5px; text-align: center;">D</td></tr>
+                    <tr><td style="padding: 5px; text-align: center;">0 - 34</td><td style="padding: 5px; text-align: center;">E</td></tr>
+                </tbody>
+            </table>
+            <div style="flex: 1; padding: 20px; border: 1px solid #000;">
+                <strong>KEY WORDS USED.</strong><br>
+                <div style="margin-top: 5px;">
+                    <strong>A.O.I Assessment</strong> - Assessment of Learning<br>
+                    <strong>Competency</strong> - Ability to apply knowledge and skills
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Words Section -->
+      
     </div>
 
-    <table align="left" style="width:40%; border-collapse:collapse; border: 1px solid #000; margin:10px 20px;" border="1">
-        <thead>
-        <tr>
-            <td><strong>AFFECTIVE TRAITS</strong></td>
-            <td><strong>RATING</strong></td>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach ($skills->where('skill_type', 'AF') as $af)
-            <tr>
-                <td>{{ $af->name }}</td>
-                <td>{{ $exr->af ? explode(',', $exr->af)[$loop->index] : '' }}</td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
+    </div>
 
-    <table align="left" style="width:35%; border-collapse:collapse;border: 1px solid #000;  margin: 10px 20px;" border="1">
-        <thead>
-        <tr>
-            <td><strong>PSYCHOMOTOR</strong></td>
-            <td><strong>RATING</strong></td>
-        </tr>
-        </thead>
-        <tbody>
-        @foreach ($skills->where('skill_type', 'PS') as $ps)
-            <tr>
-                <td>{{ $ps->name }}</td>
-                <td>{{ $exr->ps ? explode(',', $exr->ps)[$loop->index] : '' }}</td>
-            </tr>
-        @endforeach
-        </tbody>
-    </table>
-
+    <!-- Footer -->
+ 
 </div>
