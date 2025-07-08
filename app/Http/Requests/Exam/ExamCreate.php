@@ -21,9 +21,13 @@ class ExamCreate extends FormRequest
                 'required',
                 'numeric',
                 function ($attribute, $value, $fail) {
-                    $exists = \App\Models\Exam::where('term', $value)->exists();
+                    $year = \App\Helpers\Qs::getSetting('current_session');
+                    $exists = \App\Models\Exam::where('term', $value)
+                        ->where('year', $year)
+                        ->exists();
+                    
                     if ($exists) {
-                        $fail('An exam with this term already exists.');
+                        $fail('An exam with this term already exists for the current academic year.');
                     }
                 },
             ],
