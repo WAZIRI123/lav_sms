@@ -88,7 +88,7 @@
                                         <select data-placeholder="Select Teacher" class="form-control select-search" name="term" id="term">
                                             <option {{ old('term') == 1 ? 'selected' : '' }} value="1">First Term</option>
                                             <option {{ old('term') == 2 ? 'selected' : '' }} value="2">Second Term</option>
-                                            <option {{ old('term') == 3 ? 'selected' : '' }} value="3">Third Term</option>
+                
                                         </select>
                                     </div>
                                 </div>
