@@ -165,7 +165,7 @@
       <!-- School Header -->
       <div class="school-header">
         <div class="school-logo">
-            <img src="{{ $schoolLogo }}" alt="School Logo">
+            <img src="{{ $schoolLogo ? asset('storage/public/uploads/' . basename($schoolLogo)) : asset('global_assets/images/placeholders/placeholder.jpg') }}" alt="School Logo">
         </div>
         <div class="school-info">
             <h2>{{ $schoolName }}</h2>
