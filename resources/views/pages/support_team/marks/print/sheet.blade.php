@@ -165,10 +165,49 @@
     <title>Mark Sheet - {{ $studentName }}</title>
     <style>
         {!! $printStyles !!}
+        
+        @media print {
+            @page {
+                size: A4;
+                margin: 1cm;
+            }
+            
+            body {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                font-family: Arial, sans-serif;
+                line-height: 1.4;
+            }
+            
+            .no-break {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+            
+            .page-break-before {
+                page-break-before: always;
+                break-before: page;
+            }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            .marksheet-container {
+                width: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            
+            .school-header, .student-info, .marks-table, .summary {
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="marksheet-container">
+<div class="marksheet-container no-break">
     <!-- School Header -->
     <div class="school-header">
         <div class="school-logo">
@@ -266,7 +305,7 @@
     @endif
 
     <!-- Print Button (hidden when printing) -->
-    <div class="no-print" style="margin-top: 20px; text-align: center;">
+    <div class="no-print no-break" style="margin-top: 20px; text-align: center;">
         <button onclick="window.print()" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer;">
             Print Mark Sheet
         </button>
