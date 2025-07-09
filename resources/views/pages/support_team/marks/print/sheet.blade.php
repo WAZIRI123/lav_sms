@@ -172,7 +172,7 @@
     <!-- School Header -->
     <div class="school-header">
         <div class="school-logo">
-            <img src="{{ $s['logo'] }}" alt="School Logo">
+            <img src="{{ $s['logo'] ? asset('storage/public/uploads/' . basename($s['logo'])) : asset('global_assets/images/placeholders/placeholder.jpg') }}" alt="School Logo">
         </div>
         <div class="school-info">
             <h2>{{ strtoupper(Qs::getSetting('system_name')) }}</h2>
@@ -181,7 +181,7 @@
         </div>
         <div class="student-photo">
             {{-- $studentPhoto?? --}}
-            <img src="{{ asset('global_assets/images/placeholders/placeholder.jpg') }}" alt="Student Photo">
+            <img src="{{ asset('global_assets/images/user.png') }}" alt="Student Photo">
         </div>
     </div>
 
